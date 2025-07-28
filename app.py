@@ -1,32 +1,51 @@
 import streamlit as st
-import pandas as pd 
+import pandas as pd
+from fonctions import get_data_frame, mean_win_loss, barplot_WL, find_all_players, player_avg_stats, get_player_id, get_player_season
+
+st.set_page_config(layout="wide")
+
+all_players = find_all_players()
+
+default_player = "Victor Wembanyama"
+index = all_players.index(default_player)
+
+
+st.sidebar.title("Filtres")
+
+player = st.sidebar.selectbox("Choisir un joueur:",all_players, index=index)
+player_id = get_player_id(player)
+season_list = get_player_season(player_id)
+season = st.sidebar.selectbox("Choisir la saison :", season_list)
+
+
 
 st.title("🏀 Mon Dashboard NBA")
 
-st.markdown("Bienvenue dans cette application interactive construite avec Streamlit !")
-
-joueur_saisi = st.text_input("Entrez le nom d'un joueur actif :")
-
-if joueur_saisi:
-    st.write(f"✅ Vous avez sélectionné : **{joueur_saisi}**")
 
 
-liste_joueurs = ["LeBron James", "Stephen Curry", "Kevin Durant"]
-joueur_selectionne = st.selectbox("Ou choisissez un joueur dans la liste :", liste_joueurs)
+tab1, tab2 = st.tabs(["Présentation","Saison"])
 
 
-st.write(f"👀 Joueur choisi dans le menu : **{joueur_selectionne}**")
-
-df_demo = pd.DataFrame({
-    "Match": ["Match 1", "Match 2", "Match 3"],
-    "Points": [28, 35, 22],
-    "Rebonds": [8, 5, 10],
-    "Passes": [7, 9, 6]
-})
-
-st.subheader("📊 Stats fictives :")
-st.dataframe(df_demo)
+with tab1 :
+    st.write("je suis le premier onglet ")
 
 
-st.subheader("📈 Évolution des points :")
-st.line_chart(df_demo["Points"])
+with tab2 :
+    st.title(f"Statistiques de {player} lors de la saison {season}")
+    with st.container():
+        col1, col2, col3 = st.columns(3)
+        avg_pts, avg_reb, avg_ast = player_avg_stats(player,season)
+        col1.metric("🏀 Points", avg_pts)
+        col2.metric("🛡️ Rebonds", avg_reb)
+        col3.metric("🎯 Passes", avg_ast)
+
+    col1 , col2 = st.columns(2)
+
+    fig = barplot_WL(player, season)
+    col1.pyplot(fig)
+
+   
+
+
+
+
